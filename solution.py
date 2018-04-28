@@ -45,16 +45,21 @@ def naked_twins(values):
     and because it is simpler (since the reduce_puzzle function already calls this
     strategy repeatedly).
     """
-    for unit in unitlist:
-        val_list = [values[box] for box in unit]
-        duplicate_count = [val_list.count(box) for box in val_list]
-        naked_twins = [unit[i] for i in range(9) if duplicate_count[i] == 2 and len(val_list[i]) == 2]
-        non_twins = set(unit) - set(naked_twins)
-        for box in naked_twins:
-            for digit in values[box]:
-                for n in non_twins:
-                    if len(values[n]) > 1:
-                        assign_value(values, n, values[n].replace(digit, ''))
+    # Find naked pairs using small piece of code.
+    # First find pair at once.
+    naked_pairs = [(twin1,twin2)
+                   for twin1 in values.keys()
+                   for twin2 in peers[twin1]
+                   if values[twin2] == values[twin1] and len(values[twin2])==2]
+
+    # Then delete value in another loop.
+    for naked_pair_a, naked_pair_b in naked_pairs:
+        peers_ab = set(peers[naked_pair_a]) & set(peers[naked_pair_b])
+        for p in peers_ab:
+            if len(values[p]) > 1:
+                for v in values[naked_pair_a]:
+                    assign_value(values, p, values[p].replace(v, ''))
+
     return values
 
 
